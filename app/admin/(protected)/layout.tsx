@@ -6,8 +6,8 @@ import AdminNav from '@/components/admin-nav'
 
 function AdminLogo() {
   return (
-    <span className="w-6 h-6 shrink-0 rounded-full bg-cream flex items-center justify-center p-0.5 ring-1 ring-gold/40">
-      <Image src="/logo.png" alt="" width={44} height={19} className="w-full h-auto object-contain" />
+    <span className="h-6 px-1 shrink-0 rounded-sm bg-cream flex items-center ring-1 ring-gold/40">
+      <Image src="/logo.png" alt="" width={500} height={221} className="w-9 h-auto object-contain" />
     </span>
   )
 }

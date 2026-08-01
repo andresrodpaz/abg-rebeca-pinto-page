@@ -5,18 +5,23 @@ import Image from 'next/image'
 import AdminLoginForm from '@/components/admin-login-form'
 import { site } from '@/lib/site'
 
-function LoginLogo({ size = 28 }: { size?: number }) {
+function LoginLogo({ width = 64 }: { width?: number }) {
   return (
     <span
-      className="shrink-0 rounded-full flex items-center justify-center p-1"
+      className="shrink-0 rounded-sm flex items-center px-2 py-1.5"
       style={{
-        width: size,
-        height: size,
         background: 'oklch(0.97 0.012 85)',
         border: '1px solid oklch(0.76 0.10 80 / 0.45)',
       }}
     >
-      <Image src="/logo.png" alt="" width={44} height={19} className="w-full h-auto object-contain" />
+      <Image
+        src="/logo.png"
+        alt=""
+        width={500}
+        height={221}
+        style={{ width, height: 'auto' }}
+        className="object-contain"
+      />
     </span>
   )
 }
@@ -44,7 +49,7 @@ export default async function AdminLoginPage() {
         />
         <div className="relative">
           <div className="flex items-center gap-2.5 mb-16">
-            <LoginLogo size={34} />
+            <LoginLogo width={56} />
             <div>
               <p className="font-serif text-sm font-semibold uppercase tracking-[0.14em]" style={{ color: 'oklch(0.97 0.012 85)' }}>{site.name}</p>
               <p className="text-[10px] tracking-[0.22em] uppercase" style={{ color: 'oklch(0.76 0.10 80 / 0.7)' }}>{site.role} · Extranjería</p>
@@ -71,7 +76,7 @@ export default async function AdminLoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex mb-3">
-              <LoginLogo size={48} />
+              <LoginLogo width={72} />
             </div>
             <h1 className="font-serif text-xl font-semibold" style={{ color: 'oklch(0.97 0.012 85)' }}>Panel de administración</h1>
           </div>
