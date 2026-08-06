@@ -164,11 +164,12 @@ export default function AreaPageTemplate({
                 <ul className="space-y-2">
                   {[
                     ['Arraigo', '/areas/arraigo'],
+                    ['Tipos de Residencia', '/areas/residencia'],
+                    ['Visados', '/areas/visados'],
                     ['Nacionalidad española', '/areas/nacionalidad'],
                     ['Reagrupación familiar', '/areas/reagrupacion-familiar'],
                     ['Renovaciones', '/areas/renovaciones'],
                     ['TIE / NIE', '/areas/tie-nie'],
-                    ['Visados', '/areas/visados'],
                   ].map(([label, href]) => (
                     <li key={href}>
                       <Link

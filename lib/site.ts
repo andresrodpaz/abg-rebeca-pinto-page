@@ -49,14 +49,9 @@ export const site = {
   social: {
     handle: '@abogadarebecapintocamacho',
     username: 'abogadarebecapintocamacho',
+    tiktokUsername: 'rebecaandreinapintocamac',
     instagram: 'https://www.instagram.com/abogadarebecapintocamacho',
-    tiktok: 'https://www.tiktok.com/@abogadarebecapintocamacho',
-    /**
-     * Códigos de las publicaciones de Instagram a previsualizar.
-     * Se toman de la URL del post: instagram.com/p/<CODIGO>/  →  'CODIGO'
-     * (también valen los reels: instagram.com/reel/<CODIGO>/)
-     * Deja el array vacío y la sección mostrará el enlace al perfil.
-     */
+    tiktok: 'https://www.tiktok.com/@rebecaandreinapintocamac',
     instagramPosts: [] as string[],
   },
 

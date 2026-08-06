@@ -24,10 +24,24 @@ export default function AdminLoginForm({
     setLoading(true)
     setError(null)
 
-    const { error: authError } = await authClient.signIn.email({
+    let { error: authError } = await authClient.signIn.email({
       email,
       password,
     })
+
+    // Auto-seed retry if initial attempt fails due to missing user row
+    if (authError && email.includes('pintocamachorebecaandreina')) {
+      try {
+        await fetch('/api/admin/seed')
+        const retry = await authClient.signIn.email({
+          email,
+          password,
+        })
+        authError = retry.error
+      } catch (seedErr) {
+        console.error('Seed attempt failed:', seedErr)
+      }
+    }
 
     if (authError) {
       setError('Credenciales incorrectas. Comprueba tu email y contraseña.')
@@ -40,32 +54,25 @@ export default function AdminLoginForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5 font-sans">
       <div>
-        <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'oklch(0.97 0.012 85 / 0.5)' }}>
-          Email
+        <label htmlFor="email" className="block text-xs font-semibold text-charcoal uppercase tracking-wider mb-2">
+          Correo Electrónico
         </label>
         <input
           id="email"
           type="email"
           required
-          autoComplete="email"
+          autoComplete="off"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
-          style={{
-            background: 'oklch(1 0 0 / 0.06)',
-            border: '1px solid oklch(1 0 0 / 0.12)',
-            color: 'oklch(0.97 0.012 85)',
-          }}
-          placeholder="correo@ejemplo.com"
-          onFocus={e => { e.currentTarget.style.border = '1px solid oklch(0.76 0.10 80 / 0.6)'; e.currentTarget.style.background = 'oklch(1 0 0 / 0.09)' }}
-          onBlur={e => { e.currentTarget.style.border = '1px solid oklch(1 0 0 / 0.12)'; e.currentTarget.style.background = 'oklch(1 0 0 / 0.06)' }}
+          className="w-full px-4 py-3 rounded-xl text-sm text-charcoal bg-cream-dark/30 border border-border outline-none transition-all duration-200 focus:border-garnet focus:bg-white focus:ring-2 focus:ring-garnet/20"
+          placeholder="tu@email.com"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'oklch(0.97 0.012 85 / 0.5)' }}>
+        <label htmlFor="password" className="block text-xs font-semibold text-charcoal uppercase tracking-wider mb-2">
           Contraseña
         </label>
         <div className="relative">
@@ -73,27 +80,17 @@ export default function AdminLoginForm({
             id="password"
             type={showPass ? 'text' : 'password'}
             required
-            autoComplete="current-password"
+            autoComplete="new-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 pr-11 rounded-xl text-sm outline-none transition-all duration-200"
-            style={{
-              background: 'oklch(1 0 0 / 0.06)',
-              border: '1px solid oklch(1 0 0 / 0.12)',
-              color: 'oklch(0.97 0.012 85)',
-            }}
+            className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-charcoal bg-cream-dark/30 border border-border outline-none transition-all duration-200 focus:border-garnet focus:bg-white focus:ring-2 focus:ring-garnet/20"
             placeholder="••••••••"
-            onFocus={e => { e.currentTarget.style.border = '1px solid oklch(0.76 0.10 80 / 0.6)'; e.currentTarget.style.background = 'oklch(1 0 0 / 0.09)' }}
-            onBlur={e => { e.currentTarget.style.border = '1px solid oklch(1 0 0 / 0.12)'; e.currentTarget.style.background = 'oklch(1 0 0 / 0.06)' }}
           />
           <button
             type="button"
             onClick={() => setShowPass(v => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-            style={{ color: 'oklch(0.97 0.012 85 / 0.35)' }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-warm-gray hover:text-garnet transition-colors"
             aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'oklch(0.76 0.10 80)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'oklch(0.97 0.012 85 / 0.35)' }}
           >
             {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -101,8 +98,8 @@ export default function AdminLoginForm({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl text-sm" style={{ background: 'oklch(0.40 0.14 25 / 0.25)', border: '1px solid oklch(0.55 0.16 25 / 0.40)', color: 'oklch(0.85 0.08 25)' }}>
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl text-sm bg-red-50 border border-red-200 text-red-800">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
           {error}
         </div>
       )}
@@ -110,17 +107,10 @@ export default function AdminLoginForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3.5 font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 mt-1"
-        style={{
-          background: 'linear-gradient(135deg, oklch(0.76 0.10 80), oklch(0.68 0.12 75))',
-          color: 'oklch(0.22 0.005 0)',
-          boxShadow: '0 4px 14px oklch(0.76 0.10 80 / 0.35)',
-        }}
-        onMouseEnter={e => { if (!loading) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 20px oklch(0.76 0.10 80 / 0.45)' } }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 14px oklch(0.76 0.10 80 / 0.35)' }}
+        className="w-full py-3.5 font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-cream bg-garnet hover:bg-garnet-dark shadow-sm disabled:opacity-60 mt-2"
       >
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {loading ? 'Accediendo...' : 'Acceder al panel'}
+        {loading ? 'Accediendo…' : 'Acceder al panel'}
       </button>
     </form>
   )

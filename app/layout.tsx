@@ -1,49 +1,37 @@
-import { Analytics } from '@vercel/analytics/next'
-import type { Metadata, Viewport } from 'next'
+import type { Metadata } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-cormorant',
   display: 'swap',
 })
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-inter',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Abogada Rebeca Pinto Camacho | Extranjería · Residencia · Nacionalidad',
+  title: 'Rebeca Pinto Camacho · Abogada de Extranjería en Alcalá de Henares',
   description:
-    'Abogada especializada en extranjería, residencia y nacionalidad. Arraigo, reagrupación familiar, renovaciones, TIE/NIE y visados. Despacho en C/ Parque de San Fernando, 3, Alcalá de Henares (Madrid). Atención presencial y online en toda España. Tel. 687 20 24 99.',
-  keywords:
-    'abogada extranjería, abogada Alcalá de Henares, residencia España, nacionalidad española, arraigo social, reagrupación familiar, renovación residencia, TIE, NIE, visados España',
-  authors: [{ name: 'Rebeca Pinto Camacho' }],
-  creator: 'Rebeca Pinto Camacho',
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
+    'Asesoría legal especializada en extranjería, residencia y nacionalidad española. Despacho en Alcalá de Henares. Consulta presencial u online desde 50 €.',
+  keywords: [
+    'abogada extranjería Alcalá de Henares',
+    'NIE residencia arraigo',
+    'nacionalidad española',
+    'Rebeca Pinto Camacho',
+  ],
   openGraph: {
-    title: 'Abogada Rebeca Pinto Camacho | Extranjería · Residencia · Nacionalidad',
-    description:
-      'Abogada con trayectoria internacional, colegiada en el Ilustre Colegio de Abogados de Alcalá de Henares. Trato directo, sin intermediarios, seguimiento personalizado.',
+    title: 'Rebeca Pinto Camacho · Abogada de Extranjería',
+    description: 'Especializada en extranjería, residencia y nacionalidad española.',
     locale: 'es_ES',
     type: 'website',
-    images: ['/hero-image.jpeg'],
   },
-}
-
-export const viewport: Viewport = {
-  colorScheme: 'light',
-  themeColor: '#6B1A20',
-  width: 'device-width',
-  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -55,7 +43,6 @@ export default function RootLayout({
     <html lang="es" className={`${cormorant.variable} ${inter.variable} bg-background`}>
       <body className="antialiased font-sans text-foreground">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

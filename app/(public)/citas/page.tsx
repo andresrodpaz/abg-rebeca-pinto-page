@@ -2,16 +2,28 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Clock, CheckCircle, AlertCircle, Loader2, CalendarDays, Sparkles } from 'lucide-react'
+import { site } from '@/lib/site'
+
 
 const SITUATIONS = [
-  'Arraigo social',
-  'Arraigo laboral',
-  'Arraigo familiar',
+  'Arraigo Social',
+  'Arraigo Sociolaboral',
+  'Arraigo Familiar',
+  'Arraigo Socioformativo',
+  'Arraigo de Segunda Oportunidad',
+  'Visado de Estudios',
+  'Visado de Trabajo por Cuenta Ajena',
+  'Visado de Trabajo por Cuenta Propia',
+  'Visado de Reagrupación Familiar',
+  'Visado de Residencia No Lucrativa',
+  'Visado de Nómada Digital',
+  'Visado de Investigador',
+  'Visado de Emprendedor',
+  'Residencia Temporal',
+  'Residencia de Larga Duración',
   'Nacionalidad española',
-  'Reagrupación familiar',
   'Renovación de residencia',
   'TIE / NIE',
-  'Visado',
   'Otra consulta de extranjería',
 ]
 
@@ -60,7 +72,7 @@ export default function CitasPage() {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const [step, setStep] = useState<Step>('calendar')
   const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<{ bankDetails: string; slot: { date: string; time: string } } | null>(null)
+  const [result, setResult] = useState<{ bankDetails: string; slot: { date: string; time: string }; whatsappUrl?: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -121,14 +133,19 @@ export default function CitasPage() {
       const res = await fetch('/api/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slotId: selectedSlot.id, ...form }),
+        body: JSON.stringify({
+          slotId: selectedSlot.id,
+          slotDate: selectedSlot.date,
+          slotTime: selectedSlot.time,
+          ...form,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Error al enviar la solicitud.')
         return
       }
-      setResult({ bankDetails: data.bankDetails, slot: data.slot })
+      setResult({ bankDetails: data.bankDetails, slot: data.slot, whatsappUrl: data.whatsappUrl })
       setStep('confirmation')
     } catch {
       setError('Error de conexión. Por favor, inténtalo de nuevo.')
@@ -413,13 +430,32 @@ export default function CitasPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="mb-5">
+                    <div className="mb-4">
                       <h3 className="font-serif text-base font-semibold capitalize mb-0.5" style={{ color: 'oklch(0.22 0.005 0)' }}>
                         {formatDate(selectedDate)}
                       </h3>
                       <p className="text-xs font-sans" style={{ color: 'oklch(0.55 0.008 50)' }}>
                         {slotsForDate.length} horario{slotsForDate.length !== 1 ? 's' : ''} disponible{slotsForDate.length !== 1 ? 's' : ''}
                       </p>
+                    </div>
+
+                    {/* Price info banner */}
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 mb-4"
+                      style={{
+                        background: 'linear-gradient(135deg, oklch(0.638 0.112 68 / 0.10), oklch(0.638 0.112 68 / 0.06))',
+                        border: '1px solid oklch(0.638 0.112 68 / 0.30)',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem' }}>⏱</span>
+                      <div>
+                        <p className="text-xs font-sans font-semibold" style={{ color: 'oklch(0.30 0.005 0)' }}>
+                          Asesoría de 60 minutos
+                        </p>
+                        <p className="text-xs font-sans" style={{ color: 'oklch(0.638 0.112 68)' }}>
+                          <strong>50 €</strong> · Pago por transferencia o Bizum
+                        </p>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
@@ -429,21 +465,21 @@ export default function CitasPage() {
                           <button
                             key={slot.id}
                             onClick={() => setSelectedSlot(slot)}
-                            className="flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-sm font-sans font-medium transition-all duration-200"
+                            className="flex flex-col items-center justify-center gap-1 py-3 px-3 rounded-xl font-sans transition-all duration-200"
                             style={{
                               background: isChosen
-                                ? 'linear-gradient(135deg, oklch(0.32 0.12 15), oklch(0.42 0.12 15))'
+                                ? 'linear-gradient(135deg, oklch(0.46 0.066 6), oklch(0.56 0.058 6))'
                                 : 'white',
-                              color: isChosen ? 'oklch(0.97 0.012 85)' : 'oklch(0.30 0.005 0)',
+                              color: isChosen ? 'oklch(0.936 0.022 71)' : 'oklch(0.30 0.005 0)',
                               boxShadow: isChosen
-                                ? '0 4px 14px oklch(0.32 0.12 15 / 0.30)'
+                                ? '0 4px 14px oklch(0.46 0.066 6 / 0.30)'
                                 : '0 1px 3px oklch(0.22 0.005 0 / 0.08), inset 0 0 0 1px oklch(0.88 0.015 80)',
                               transform: isChosen ? 'scale(1.03)' : 'scale(1)',
                             }}
                             onMouseEnter={e => {
                               if (!isChosen) {
                                 const el = e.currentTarget as HTMLButtonElement
-                                el.style.boxShadow = '0 4px 12px oklch(0.32 0.12 15 / 0.12), inset 0 0 0 1px oklch(0.42 0.12 15 / 0.5)'
+                                el.style.boxShadow = '0 4px 12px oklch(0.46 0.066 6 / 0.12), inset 0 0 0 1px oklch(0.46 0.066 6 / 0.4)'
                                 el.style.transform = 'scale(1.02)'
                               }
                             }}
@@ -455,8 +491,16 @@ export default function CitasPage() {
                               }
                             }}
                           >
-                            <Clock className="w-3.5 h-3.5" style={{ opacity: isChosen ? 0.85 : 0.5 }} />
-                            {slot.time.slice(0, 5)}
+                            <span className="flex items-center gap-1.5 text-sm font-medium">
+                              <Clock className="w-3.5 h-3.5" style={{ opacity: isChosen ? 0.85 : 0.5 }} />
+                              {slot.time.slice(0, 5)} h
+                            </span>
+                            <span
+                              className="text-[10px] font-sans"
+                              style={{ opacity: isChosen ? 0.85 : 0.55 }}
+                            >
+                              60 min · 50 €
+                            </span>
                           </button>
                         )
                       })}
@@ -498,17 +542,17 @@ export default function CitasPage() {
           >
             {/* Selected slot summary */}
             <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3.5 mb-8"
+              className="flex items-center gap-3 rounded-xl px-4 py-3.5 mb-5"
               style={{
-                background: 'linear-gradient(135deg, oklch(0.32 0.12 15 / 0.05), oklch(0.76 0.10 80 / 0.06))',
-                border: '1px solid oklch(0.32 0.12 15 / 0.12)',
+                background: 'linear-gradient(135deg, oklch(0.46 0.066 6 / 0.05), oklch(0.638 0.112 68 / 0.06))',
+                border: '1px solid oklch(0.46 0.066 6 / 0.12)',
               }}
             >
               <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: 'oklch(0.32 0.12 15)', boxShadow: '0 2px 8px oklch(0.32 0.12 15 / 0.30)' }}
+                style={{ background: 'oklch(0.46 0.066 6)', boxShadow: '0 2px 8px oklch(0.46 0.066 6 / 0.30)' }}
               >
-                <CalendarDays className="w-4 h-4" style={{ color: 'oklch(0.97 0.012 85)' }} />
+                <CalendarDays className="w-4 h-4" style={{ color: 'oklch(0.936 0.022 71)' }} />
               </div>
               <div>
                 <p className="text-xs font-sans" style={{ color: 'oklch(0.55 0.008 50)' }}>Cita seleccionada</p>
@@ -519,12 +563,31 @@ export default function CitasPage() {
               <button
                 onClick={() => { setStep('calendar'); setSelectedSlot(null) }}
                 className="ml-auto text-xs font-sans font-medium transition-colors"
-                style={{ color: 'oklch(0.32 0.12 15)' }}
+                style={{ color: 'oklch(0.46 0.066 6)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.textDecoration = 'underline' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.textDecoration = 'none' }}
               >
                 Cambiar
               </button>
+            </div>
+
+            {/* Price summary */}
+            <div
+              className="flex items-center gap-4 rounded-xl px-5 py-4 mb-8"
+              style={{
+                background: 'linear-gradient(135deg, oklch(0.638 0.112 68 / 0.08), oklch(0.638 0.112 68 / 0.04))',
+                border: '1.5px solid oklch(0.638 0.112 68 / 0.35)',
+              }}
+            >
+              <div className="flex-1">
+                <p className="text-xs font-sans font-semibold uppercase tracking-wider mb-0.5" style={{ color: 'oklch(0.638 0.112 68)', letterSpacing: '0.10em' }}>Servicio</p>
+                <p className="text-sm font-sans font-semibold" style={{ color: 'oklch(0.22 0.005 0)' }}>Asesoría de 60 minutos</p>
+                <p className="text-xs font-sans mt-0.5" style={{ color: 'oklch(0.55 0.008 50)' }}>Pago por transferencia bancaria o Bizum</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="font-serif text-2xl font-bold" style={{ color: 'oklch(0.46 0.066 6)', letterSpacing: '-0.02em' }}>50 €</p>
+                <p className="text-[10px] font-sans" style={{ color: 'oklch(0.55 0.008 50)' }}>IVA incluido</p>
+              </div>
             </div>
 
             <h2 className="font-serif text-2xl font-bold mb-6" style={{ color: 'oklch(0.22 0.005 0)', letterSpacing: '-0.02em' }}>
@@ -655,13 +718,13 @@ export default function CitasPage() {
 
               <div
                 className="text-xs font-sans leading-relaxed px-4 py-3 rounded-xl"
-                style={{ background: 'oklch(0.96 0.012 80)', color: 'oklch(0.45 0.008 50)' }}
+                style={{ background: 'oklch(0.936 0.022 71)', color: 'oklch(0.45 0.008 50)' }}
               >
                 Al enviar este formulario aceptas nuestra{' '}
-                <a href="/politica-privacidad" style={{ color: 'oklch(0.32 0.12 15)', textDecorationLine: 'underline' }}>
+                <a href="/politica-privacidad" style={{ color: 'oklch(0.46 0.066 6)', textDecorationLine: 'underline' }}>
                   política de privacidad
                 </a>.
-                Recibirás un email con los datos bancarios para confirmar la cita (50&nbsp;€).
+                Recibirás por <strong>email y WhatsApp</strong> los datos bancarios para confirmar la cita (importe: <strong>50&nbsp;€</strong>).
               </div>
 
               <div className="flex gap-3 pt-1">
@@ -728,9 +791,24 @@ export default function CitasPage() {
               <strong style={{ color: 'oklch(0.22 0.005 0)' }} className="capitalize">{formatDate(result.slot.date)}</strong>{' '}
               a las <strong style={{ color: 'oklch(0.22 0.005 0)' }}>{result.slot.time.slice(0, 5)} h</strong> ha sido recibida.
             </p>
-            <p className="text-sm font-sans leading-relaxed mb-8" style={{ color: 'oklch(0.55 0.008 50)' }}>
-              Hemos enviado un email a tu correo con los datos de pago. Una vez recibido el importe, la cita quedará confirmada.
+            <p className="text-sm font-sans leading-relaxed mb-4" style={{ color: 'oklch(0.55 0.008 50)' }}>
+              Hemos enviado un <strong style={{ color: 'oklch(0.22 0.005 0)' }}>email</strong> a tu correo con los datos de pago.
+              También puedes acceder a ellos directamente por WhatsApp.
             </p>
+            <a
+              href={result?.whatsappUrl || (result ? `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(`¡Hola Rebeca! He reservado una consulta legal en la web para el ${result.slot.date} a las ${result.slot.time.slice(0,5)} h. Quedo a la espera de confirmar el pago (50 €). ¡Gracias!`)}` : '#')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-sans font-semibold mb-8 transition-all duration-200"
+              style={{
+                background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                color: 'white',
+                boxShadow: '0 4px 14px rgba(37,211,102,0.35)',
+              }}
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+              Confirmar por WhatsApp
+            </a>
 
             <div
               className="rounded-2xl p-6 text-left mb-8"

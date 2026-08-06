@@ -1,0 +1,78 @@
+Qué cambió
+
+lib/site.ts (nuevo) — punto único de verdad: teléfono, dirección, cobertura, colegiación, redes. Todo lo demás lo consume desde ahí, así que un cambio de dato se hace en un solo sitio.
+
+Fotos reales, sin placeholders. Las tres imágenes de public/ ya están en uso:
+- hero-image.jpeg → retrato del hero, con marco dorado fino desplazado.
+- about-me.jpeg → retrato de Sobre mí (la de la Universidad de Alcalá, que encaja bien con el despacho).
+- logo.png → navbar, footer, panel admin y favicon. Es apaisado (500×221) y granate sobre b granate
+            <div className="in
+line-flex mb-3">
+              <LoginLogo size=
+{48} />
+th
+={72} />
+
+            <h1 className="fon
+d"
+ style={{ color: 'oklch(0.97 0
+.012 85)' }}>Panel de administ
+
+          </div>
+
+Ahora aicarlovisualmente:
+
+  Ran 1 s
+
+● Skill(claude-in-chrome)
+Succ
+
+Sin herramientas de navegador, verifico el
+renderi
+
+  Ran 5 shell commands, wrote 2 memories
+
+● Background command "Start the Next.js dev server" failed with exit code 255
+
+Listo. Build limpio, tsc --noEmit sin errores y las 7 páginas públicas verificadas por HTTP con el contenido real renderizado.
+
+Qué cambió
+
+lib/site.ts (nuevo) — punto único de verdad:
+teléfongiación,redes. Todo lo demás lo consume desde ahí, así que un cambio de dato se hace en un solo
+sitio.
+
+Fotos reales, sin placeholders. Las tres
+imágene
+- hero-image.jpeg → retrato del hero, con marco dorado fino desplazado.
+- aboutí (la dela Universidad de Alcalá, que encaja bien con el despacho).
+- logo.png → navbar, footer, panel admin y favicon. Es apaisado (500×221) y granate sobre blanco, así que sobre el fondo granate va en una placa crema con filete dorado, no
+en un c
+
+Estilos. La paleta granate/crema/dorado ya
+existía añadidoes el sistema tipográfico que pedías: clases .display / .display-lg (serif en mayúsculas
+con tra,.eyebrow (sans, versalitas, tracking 0.22em)
+para loosseparadores dorados a 1px más .gold-rule para
+el fileasdoradas gruesas de 4px entre secciones ahora son de 1px.
+
+Contacto real. Dirección completa, teléfono clicable (tel:), WhatsApp, mapa embebido y "presencial y online en toda España" en navbar, hero, footer, contacto, sidebar de
+áreas ySON-LDLegalService con la dirección y la
+colegiala fichalocal en buscadores.
+
+Tagline. "Extranjería · Residencia · Nacionalidad" como destacado en el hero
+(serif petido en la barra superior de la navbar, el footer y Sobre mí.
+
+Biografía. Reescrita en cuatro párrafos —Venezuela, la emigración de 2017, el acceso
+a la abropio—más una línea de tiempo vertical con seis hitos que sustituye la lista de "[pendiente de completar]". El aviso legal y la política de privacidad ahora dicen Ilustre Colegio de
+Abogado Madrid.
+
+Redes. e perfil, que se actualiza solo con los últimos
+vídeos.perfilpúblico: solo permite incrustar posts sueltos, así que dejé
+site.soy decódigos —se copian de la URL del post (instagram.com/p/ABC123/ → 'ABC123')— y
+mientraarjeta de seguimiento en su lugar en vez de un hueco roto.
+
+Tres con deRebeca
+
+1. El email info@rebecapintocamacho.es veníadel connfirmó.Lo mantuve porque es el destinatario del    formulaero si el correo real es otro hay que cambiarlo en lib/site.ts.                                2. El W 24 99 lo tiene, al ser el único teléfono facilitado.
+3. Los posts de Instagram para activar el embed.                                      
+Las dependencias no estaban instaladas, así que ejeckfile.De paso corregí una variable tipográfica rota en /citans, una fuente que no existe en el proyecto.

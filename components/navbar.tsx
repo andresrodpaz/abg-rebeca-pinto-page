@@ -9,11 +9,12 @@ import { site } from '@/lib/site'
 
 const areas = [
   { href: '/areas/arraigo', label: 'Arraigo' },
+  { href: '/areas/residencia', label: 'Tipos de Residencia' },
+  { href: '/areas/visados', label: 'Visados' },
   { href: '/areas/nacionalidad', label: 'Nacionalidad' },
   { href: '/areas/reagrupacion-familiar', label: 'Reagrupación Familiar' },
   { href: '/areas/renovaciones', label: 'Renovaciones' },
   { href: '/areas/tie-nie', label: 'TIE / NIE' },
-  { href: '/areas/visados', label: 'Visados' },
 ]
 
 const navLinks = [

@@ -5,16 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Brand palette */
-  --color-garnet:          oklch(0.32 0.12 15);
-  --color-garnet-dark:     oklch(0.24 0.10 15);
-  --color-garnet-light:    oklch(0.42 0.12 15);
-  --color-cream:           oklch(0.97 0.012 85);
-  --color-cream-dark:      oklch(0.93 0.015 85);
-  --color-gold:            oklch(0.76 0.10 80);
-  --color-gold-light:      oklch(0.88 0.08 80);
-  --color-charcoal:        oklch(0.22 0.005 0);
-  --color-warm-gray:       oklch(0.55 0.008 50);
+  /* Brand palette — hex refs: cream #F3E9DD · garnet #8B5A62 · charcoal #262626 · gold #B8923B */
+  --color-garnet:          oklch(0.46 0.066 6);    /* #8B5A62 — granate apagado / mauve */
+  --color-garnet-dark:     oklch(0.36 0.058 6);    /* oscuro del mauve */
+  --color-garnet-light:    oklch(0.56 0.058 6);    /* claro del mauve */
+  --color-cream:           oklch(0.936 0.022 71);  /* #F3E9DD — crema/beige dominante */
+  --color-cream-dark:      oklch(0.900 0.024 71);  /* crema más oscuro para cards/hover */
+  --color-gold:            oklch(0.638 0.112 68);  /* #B8923B — dorado mostaza */
+  --color-gold-light:      oklch(0.780 0.080 70);  /* dorado claro */
+  --color-charcoal:        oklch(0.200 0.000 0);   /* #262626 — negro/carbón */
+  --color-warm-gray:       oklch(0.500 0.010 50);  /* gris cálido para texto secundario */
 
   /* Semantic tokens */
   --color-background:              var(--color-cream);

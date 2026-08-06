@@ -91,7 +91,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             {/* Texto */}
             <div>
-              <p className="eyebrow text-gold mb-5">{site.role} · Alcalá de Henares</p>
+              <p className="eyebrow text-[#F5E6C8] font-semibold mb-5 tracking-[0.20em]">{site.role} · Alcalá de Henares</p>
 
               <h1 className="display-lg text-cream text-3xl md:text-4xl lg:text-5xl text-balance mb-6">
                 Rebeca Pinto Camacho
@@ -101,8 +101,8 @@ export default function HomePage() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-7">
                 {site.specialties.map((s, i) => (
                   <span key={s} className="flex items-center gap-3">
-                    {i > 0 && <span className="w-1 h-1 rounded-full bg-gold" aria-hidden="true" />}
-                    <span className="font-serif text-gold text-base md:text-lg uppercase tracking-[0.18em]">
+                    {i > 0 && <span className="w-1.5 h-1.5 rounded-full bg-[#F5E6C8]" aria-hidden="true" />}
+                    <span className="font-serif text-[#F5E6C8] text-base md:text-lg uppercase tracking-[0.18em] font-semibold">
                       {s}
                     </span>
                   </span>
