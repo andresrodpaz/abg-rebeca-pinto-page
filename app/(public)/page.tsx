@@ -250,19 +250,6 @@ export default function HomePage() {
       {/* REDES SOCIALES */}
       <section className="py-20 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="eyebrow text-gold">Sígueme</p>
-            <h2 className="display text-2xl md:text-3xl text-charcoal mt-3 text-balance">
-              Instagram &amp; TikTok
-            </h2>
-            <span className="gold-divider mx-auto mt-5" aria-hidden="true" />
-            <p className="mt-5 text-warm-gray text-sm max-w-lg mx-auto leading-relaxed">
-              Comparto consejos sobre trámites de extranjería, novedades en la normativa y
-              respondo las dudas más frecuentes en{' '}
-              <span className="text-garnet font-medium">{site.social.handle}</span>.
-            </p>
-          </div>
-
           <SocialFeed />
         </div>
       </section>
