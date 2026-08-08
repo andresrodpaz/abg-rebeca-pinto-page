@@ -6,10 +6,10 @@ import { site } from '@/lib/site'
 
 const BANK_DETAILS = `Titular: Rebeca Pinto Camacho
 IBAN: ES00 0000 0000 0000 0000 0000
-Concepto: Consulta + tu nombre completo
+Concepto: Consulta + nombre completo
 Importe: 50 €
 
-También puedes realizar el pago por Bizum al número: ${site.phone.display}`
+Bizum: ${site.phone.display}`
 
 export async function POST(request: NextRequest) {
   try {
@@ -129,8 +129,17 @@ export async function POST(request: NextRequest) {
     const formattedDate = formatDateEs(actualSlot.date)
     const formattedTime = `${actualSlot.time.slice(0, 5)} h`
 
-    // Pre-formatted standard WhatsApp link payload sent directly to Rebeca's WhatsApp
-    const waMessage = `¡Hola Rebeca! He realizado la solicitud de cita a través de la web:\n\n👤 Nombre: ${clientName}\n📧 Email: ${clientEmail}\n📞 Teléfono: ${clientPhone}\n📅 Cita: ${formattedDate} a las ${formattedTime}\n📌 Asunto: ${migratorySituation}\n💬 Comentarios: ${message || 'Ninguno'}\n💼 Servicio: Asesoría de 60 minutos (50 €)\n\n💳 Instrucciones de pago:\n${BANK_DETAILS}\n\n📎 Adjunto mi comprobante de pago para la confirmación definitiva. ¡Muchas gracias!`
+    // WhatsApp message — concise and natural, written from the client's perspective
+    const waLines = [
+      `Hola Rebeca, acabo de solicitar una cita a través de tu web.`,
+      ``,
+      `Mi nombre es ${clientName} y he reservado el ${formattedDate} a las ${formattedTime}.`,
+      `Mi consulta es sobre: ${migratorySituation}.`,
+      ...(message ? [``, `Te cuento un poco más: ${message}`] : []),
+      ``,
+      `Te mando el comprobante de pago en cuanto lo realice. ¡Gracias!`,
+    ]
+    const waMessage = waLines.join('\n')
     const waUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(waMessage)}`
 
     return NextResponse.json({

@@ -1,15 +1,25 @@
 import { betterAuth } from 'better-auth'
-import { pool } from '@/lib/db'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { db } from '@/lib/db'
+import * as schema from '@/lib/db/schema'
 
 export const auth = betterAuth({
-  database: pool,
+  database: drizzleAdapter(db, {
+    provider: 'pg',
+    schema: {
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
+    },
+  }),
   secret: process.env.BETTER_AUTH_SECRET || 'abogada-rebeca-pinto-secret-key-2026',
   baseURL:
     process.env.BETTER_AUTH_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.URL ||
     process.env.DEPLOY_PRIME_URL ||
-    undefined, // Permite resolución dinámica del origen desde los encabezados de la petición
+    undefined,
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -17,10 +27,7 @@ export const auth = betterAuth({
   advanced: {
     checkOrigin: false,
   },
-  // Confía dinámicamente en cualquier dominio (Netlify preview, abogadarebecapintocamacho.es, localhost, etc.)
-  trustedOrigins: (request) => {
-    return true
-  },
+  trustedOrigins: ['*'],
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,

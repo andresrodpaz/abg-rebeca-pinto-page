@@ -37,8 +37,8 @@ export default async function AdminLoginPage() {
 
   if (session?.user) redirect('/admin')
 
-  // Auto-ensure admin user exists in DB
-  await ensureAdminUser()
+  // Auto-ensure admin user exists in DB (non-blocking)
+  void ensureAdminUser()
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-cream py-12 px-4 sm:px-6 lg:px-8">
