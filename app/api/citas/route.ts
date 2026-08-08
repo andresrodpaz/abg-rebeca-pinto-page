@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { appointments, availableSlots } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { Resend } from 'resend'
 import { site } from '@/lib/site'
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 const BANK_DETAILS = `Titular: Rebeca Pinto Camacho
 IBAN: ES00 0000 0000 0000 0000 0000
@@ -89,13 +86,12 @@ export async function POST(request: NextRequest) {
         finalSlotId = insertedSlot.id
       } catch (dbErr) {
         console.error('[citas] Error inserting new slot:', dbErr)
-        // Fallback synthetic slot ID if DB insert fails
         actualSlot = { id: 999999, date: targetDate, time: targetTime, isBooked: true }
         finalSlotId = 999999
       }
     }
 
-    // Create appointment in DB
+    // Create appointment record in DB
     let appointmentId = Date.now()
     try {
       const [appointment] = await db
@@ -133,74 +129,9 @@ export async function POST(request: NextRequest) {
     const formattedDate = formatDateEs(actualSlot.date)
     const formattedTime = `${actualSlot.time.slice(0, 5)} h`
 
-    // Single consolidated WhatsApp confirmation message
-    const waMessage = `¡Hola Rebeca! He realizado la solicitud de cita a través de la web:\n\n👤 Nombre: ${clientName}\n📅 Cita: ${formattedDate} a las ${formattedTime}\n📌 Asunto: ${migratorySituation}\n💼 Servicio: Asesoría de 60 minutos (50 €)\n\n💳 Instrucciones de pago:\n${BANK_DETAILS}\n\n📎 Una vez realizado el pago, enviaré por aquí el comprobante para la confirmación definitiva de la cita. ¡Muchas gracias!`
+    // Pre-formatted standard WhatsApp link payload sent directly to Rebeca's WhatsApp
+    const waMessage = `¡Hola Rebeca! He realizado la solicitud de cita a través de la web:\n\n👤 Nombre: ${clientName}\n📧 Email: ${clientEmail}\n📞 Teléfono: ${clientPhone}\n📅 Cita: ${formattedDate} a las ${formattedTime}\n📌 Asunto: ${migratorySituation}\n💬 Comentarios: ${message || 'Ninguno'}\n💼 Servicio: Asesoría de 60 minutos (50 €)\n\n💳 Instrucciones de pago:\n${BANK_DETAILS}\n\n📎 Adjunto mi comprobante de pago para la confirmación definitiva. ¡Muchas gracias!`
     const waUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(waMessage)}`
-
-    // Send confirmation email via Resend if configured
-    if (resend) {
-      try {
-        await resend.emails.send({
-          from: `Rebeca Pinto Camacho <noreply@rebecapintocamacho.es>`,
-          to: clientEmail,
-          subject: `Solicitud de cita recibida — ${actualSlot.date} a las ${actualSlot.time.slice(0, 5)} h`,
-          html: `
-            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #F3E9DD;">
-              <div style="background: #8B5A62; padding: 28px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: #B8923B; font-size: 22px; margin: 0; letter-spacing: 0.04em;">Rebeca Pinto Camacho</h1>
-                <p style="color: #F3E9DD; font-size: 11px; margin: 6px 0 0; letter-spacing: 3px; text-transform: uppercase;">Abogada · Extranjería</p>
-              </div>
-              <div style="background: white; padding: 36px; border-radius: 0 0 10px 10px; border: 1px solid #E8DDD0;">
-                <h2 style="color: #262626; font-size: 20px; margin-bottom: 6px; letter-spacing: -0.01em;">Solicitud de cita recibida</h2>
-                <p style="color: #6B5F55; font-size: 14px; line-height: 1.7; margin-bottom: 6px;">Hola <strong>${clientName}</strong>,</p>
-                <p style="color: #6B5F55; font-size: 14px; line-height: 1.7; margin-bottom: 24px;">
-                  Hemos recibido tu solicitud de cita. Tu reserva quedará <strong>confirmada una vez recibamos el comprobante de pago</strong> de la consulta (50 €).
-                </p>
-
-                <div style="background: #F3E9DD; border-left: 3px solid #B8923B; padding: 18px; margin-bottom: 24px; border-radius: 4px;">
-                  <strong style="color: #262626; font-size: 12px; text-transform: uppercase; letter-spacing: 0.10em;">Datos de tu cita</strong>
-                  <table style="margin-top: 10px; font-size: 14px; color: #6B5F55; line-height: 2; border-collapse: collapse;">
-                    <tr><td style="padding-right: 20px; color: #262626; font-weight: 600; white-space: nowrap;">Fecha:</td><td>${actualSlot.date}</td></tr>
-                    <tr><td style="padding-right: 20px; color: #262626; font-weight: 600;">Hora:</td><td>${actualSlot.time.slice(0, 5)} h</td></tr>
-                    <tr><td style="padding-right: 20px; color: #262626; font-weight: 600;">Duración:</td><td>60 minutos</td></tr>
-                    <tr><td style="padding-right: 20px; color: #262626; font-weight: 600;">Asunto:</td><td>${migratorySituation}</td></tr>
-                  </table>
-                </div>
-
-                <div style="background: #262626; padding: 22px 24px; border-radius: 8px; margin-bottom: 24px;">
-                  <h3 style="color: #B8923B; font-size: 13px; margin: 0 0 14px; letter-spacing: 0.10em; text-transform: uppercase; font-family: system-ui, sans-serif;">Datos de pago (50 €)</h3>
-                  <pre style="color: #F3E9DD; font-family: 'Courier New', monospace; font-size: 13px; margin: 0; white-space: pre-wrap; line-height: 1.8;">${BANK_DETAILS}</pre>
-                </div>
-
-                <div style="text-align: center; margin-bottom: 28px;">
-                  <a href="${waUrl}" target="_blank"
-                    style="display: inline-block; background: linear-gradient(135deg, #25D366, #128C7E); color: white; text-decoration: none; font-family: system-ui, sans-serif; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 10px;">
-                    ✓ Enviar comprobante por WhatsApp
-                  </a>
-                  <p style="color: #9E9085; font-size: 12px; margin: 10px 0 0; font-family: system-ui, sans-serif;">
-                    Haz clic para abrir WhatsApp y enviarnos tu comprobante de pago
-                  </p>
-                </div>
-
-                <p style="color: #6B5F55; font-size: 13px; line-height: 1.7; margin-bottom: 24px;">
-                  Una vez enviado el comprobante por WhatsApp o responder a este email, te confirmaremos definitivamente la cita.
-                </p>
-                <p style="color: #6B5F55; font-size: 13px; margin: 0;">
-                  Un saludo cordial,<br/>
-                  <strong style="color: #8B5A62;">Rebeca Pinto Camacho</strong><br/>
-                  Abogada de Extranjería
-                </p>
-              </div>
-              <p style="text-align: center; color: #9E9085; font-size: 11px; margin-top: 20px; font-family: system-ui, sans-serif;">
-                ${site.address.full} · ${site.email}
-              </p>
-            </div>
-          `,
-        })
-      } catch (emailError) {
-        console.error('[citas] Error sending confirmation email:', emailError)
-      }
-    }
 
     return NextResponse.json({
       success: true,

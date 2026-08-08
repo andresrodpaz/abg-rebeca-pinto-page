@@ -147,6 +147,9 @@ export default function CitasPage() {
       }
       setResult({ bankDetails: data.bankDetails, slot: data.slot, whatsappUrl: data.whatsappUrl })
       setStep('confirmation')
+      if (data.whatsappUrl) {
+        window.open(data.whatsappUrl, '_blank')
+      }
     } catch {
       setError('Error de conexión. Por favor, inténtalo de nuevo.')
     } finally {
