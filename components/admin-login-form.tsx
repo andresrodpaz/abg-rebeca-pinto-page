@@ -24,33 +24,39 @@ export default function AdminLoginForm({
     setLoading(true)
     setError(null)
 
-    let { error: authError } = await authClient.signIn.email({
-      email,
-      password,
-    })
+    try {
+      let { error: authError } = await authClient.signIn.email({
+        email,
+        password,
+      })
 
-    // Auto-seed retry if initial attempt fails due to missing user row
-    if (authError && email.includes('pintocamachorebecaandreina')) {
-      try {
-        await fetch('/api/admin/seed')
-        const retry = await authClient.signIn.email({
-          email,
-          password,
-        })
-        authError = retry.error
-      } catch (seedErr) {
-        console.error('Seed attempt failed:', seedErr)
+      // Auto-seed retry if initial attempt fails due to missing user row in DB
+      if (authError && email.toLowerCase().includes('pintocamachorebecaandreina')) {
+        try {
+          await fetch('/api/admin/seed')
+          const retry = await authClient.signIn.email({
+            email,
+            password,
+          })
+          authError = retry.error
+        } catch (seedErr) {
+          console.error('Seed attempt failed:', seedErr)
+        }
       }
-    }
 
-    if (authError) {
-      setError('Credenciales incorrectas. Comprueba tu email y contraseña.')
+      if (authError) {
+        setError('Credenciales incorrectas. Comprueba tu email y contraseña.')
+        setLoading(false)
+        return
+      }
+
+      router.push('/admin')
+      router.refresh()
+    } catch (err) {
+      console.error('Sign-in exception:', err)
+      setError('Error al conectar con el servidor. Inténtalo de nuevo.')
       setLoading(false)
-      return
     }
-
-    router.push('/admin')
-    router.refresh()
   }
 
   return (
