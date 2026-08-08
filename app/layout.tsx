@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     'nacionalidad española',
     'Rebeca Pinto Camacho',
   ],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   openGraph: {
     title: 'Rebeca Pinto Camacho · Abogada de Extranjería',
     description: 'Especializada en extranjería, residencia y nacionalidad española.',
