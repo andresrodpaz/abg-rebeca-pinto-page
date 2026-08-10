@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { getScheduleConfig, saveScheduleConfig, ScheduleConfig } from '@/lib/schedule'
 import { headers } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 async function requireAdmin() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) throw new Error('Unauthorized')
@@ -13,7 +15,11 @@ export async function GET() {
   try {
     await requireAdmin()
     const config = getScheduleConfig()
-    return NextResponse.json({ config })
+    return NextResponse.json({ config }, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0'
+      }
+    })
   } catch (e) {
     const err = e as Error
     if (err.message === 'Unauthorized') {
@@ -30,15 +36,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate if action is to disable/enable a date or specific slot
-    const { startHour, endHour, slotDurationMinutes, activeDays, action, date, time } = body
+    const { startHour, endHour, slotDurationMinutes, activeDays, disabledDates, action, date, time } = body
 
     const current = getScheduleConfig()
 
     if (action === 'toggleDate' && date) {
-      const disabledDates = current.disabledDates.includes(date)
+      const newDisabledDates = current.disabledDates.includes(date)
         ? current.disabledDates.filter(d => d !== date)
         : [...current.disabledDates, date]
-      const updated = saveScheduleConfig({ disabledDates })
+      const updated = saveScheduleConfig({ disabledDates: newDisabledDates })
       return NextResponse.json({ success: true, config: updated })
     }
 
@@ -57,6 +63,7 @@ export async function POST(request: NextRequest) {
     if (endHour) updateData.endHour = endHour
     if (slotDurationMinutes) updateData.slotDurationMinutes = Number(slotDurationMinutes)
     if (Array.isArray(activeDays)) updateData.activeDays = activeDays
+    if (Array.isArray(disabledDates)) updateData.disabledDates = disabledDates
 
     const updated = saveScheduleConfig(updateData)
     return NextResponse.json({ success: true, config: updated })

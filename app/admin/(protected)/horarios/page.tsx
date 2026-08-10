@@ -57,7 +57,9 @@ export default function HorariosAdminPage() {
   const fetchConfig = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/horarios')
+      const res = await fetch(`/api/admin/horarios?t=${Date.now()}`, {
+        cache: 'no-store'
+      })
       const data = await res.json()
       if (data.config) {
         setForm({
