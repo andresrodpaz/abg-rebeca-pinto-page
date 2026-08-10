@@ -1,8 +1,6 @@
 import { db } from '@/lib/db'
-import { availableSlots } from '@/lib/db/schema'
-import { and, gte, lte, asc } from 'drizzle-orm'
-import fs from 'fs'
-import path from 'path'
+import { availableSlots, settings } from '@/lib/db/schema'
+import { and, gte, lte, asc, eq } from 'drizzle-orm'
 import { initAppTables } from '@/lib/db/init'
 
 export interface ScheduleConfig {
@@ -12,9 +10,8 @@ export interface ScheduleConfig {
   activeDays: number[] // [1, 2, 3, 4, 5] (1=Mon, 5=Fri)
   disabledDates: string[] // ["YYYY-MM-DD"]
   disabledSlots: { date: string; time: string }[]
+  generalDisabledSlots?: string[] // specific times to skip generally (e.g., ["10:30"])
 }
-
-const CONFIG_FILE = path.join(process.cwd(), 'data', 'schedule-config.json')
 
 export const DEFAULT_CONFIG: ScheduleConfig = {
   startHour: '09:00',
@@ -23,31 +20,47 @@ export const DEFAULT_CONFIG: ScheduleConfig = {
   activeDays: [1, 2, 3, 4, 5], // Lunes a Viernes
   disabledDates: [],
   disabledSlots: [],
+  generalDisabledSlots: [],
 }
 
-export function getScheduleConfig(): ScheduleConfig {
+export async function getScheduleConfig(): Promise<ScheduleConfig> {
   try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const data = fs.readFileSync(CONFIG_FILE, 'utf8')
-      return { ...DEFAULT_CONFIG, ...JSON.parse(data) }
+    await initAppTables()
+    const [row] = await db.select().from(settings).where(eq(settings.key, 'schedule_config'))
+    if (row?.value) {
+      return { ...DEFAULT_CONFIG, ...JSON.parse(row.value) }
     }
   } catch (e) {
-    console.error('[schedule] Error reading schedule config file:', e)
+    console.error('[schedule] Error reading schedule config from DB:', e)
   }
   return DEFAULT_CONFIG
 }
 
-export function saveScheduleConfig(config: Partial<ScheduleConfig>): ScheduleConfig {
-  const current = getScheduleConfig()
+export async function saveScheduleConfig(config: Partial<ScheduleConfig>): Promise<ScheduleConfig> {
+  const current = await getScheduleConfig()
+  
+  // Si cambia la hora de inicio o fin, reseteamos los generalDisabledSlots para evitar inconsistencias
+  if ((config.startHour && config.startHour !== current.startHour) || 
+      (config.endHour && config.endHour !== current.endHour) ||
+      (config.slotDurationMinutes && config.slotDurationMinutes !== current.slotDurationMinutes)) {
+    config.generalDisabledSlots = []
+  }
+
   const updated = { ...current, ...config }
+  
   try {
-    const dir = path.dirname(CONFIG_FILE)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
+    await initAppTables()
+    
+    // Check if exists
+    const [exists] = await db.select().from(settings).where(eq(settings.key, 'schedule_config'))
+    
+    if (exists) {
+      await db.update(settings).set({ value: JSON.stringify(updated) }).where(eq(settings.key, 'schedule_config'))
+    } else {
+      await db.insert(settings).values({ key: 'schedule_config', value: JSON.stringify(updated) })
     }
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2), 'utf8')
   } catch (e) {
-    console.error('[schedule] Error saving schedule config file:', e)
+    console.error('[schedule] Error saving schedule config to DB:', e)
   }
   return updated
 }
@@ -84,7 +97,7 @@ export interface SlotItem {
  * Gets or dynamically generates available 30-minute slots for a given month (YYYY-MM).
  */
 export async function getAvailableSlotsForMonth(monthStr: string): Promise<SlotItem[]> {
-  const config = getScheduleConfig()
+  const config = await getScheduleConfig()
   const [year, month] = monthStr.split('-').map(Number)
   const daysInMonth = new Date(year, month, 0).getDate()
 
@@ -115,6 +128,8 @@ export async function getAvailableSlotsForMonth(monthStr: string): Promise<SlotI
   }
 
   const times = generateTimes(config.startHour, config.endHour, config.slotDurationMinutes || 30)
+    .filter(t => !config.generalDisabledSlots?.includes(t)) // Filter out globally disabled times
+  
   const result: SlotItem[] = []
   let syntheticIdCounter = 900000
 

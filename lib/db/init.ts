@@ -18,6 +18,13 @@ export async function initAppTables() {
   `)
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+  `)
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS appointments (
       id SERIAL PRIMARY KEY,
       slot_id INTEGER NOT NULL,

@@ -17,7 +17,9 @@ import {
   Trash2,
   Sun,
   Sunset,
-  Zap
+  Zap,
+  X,
+  RotateCcw
 } from 'lucide-react'
 
 interface ScheduleConfig {
@@ -52,6 +54,7 @@ export default function HorariosAdminPage() {
     slotDurationMinutes: 30,
     activeDays: [1, 2, 3, 4, 5],
     disabledDates: [] as string[],
+    generalDisabledSlots: [] as string[],
   })
 
   const fetchConfig = useCallback(async () => {
@@ -68,6 +71,7 @@ export default function HorariosAdminPage() {
           slotDurationMinutes: data.config.slotDurationMinutes || 30,
           activeDays: data.config.activeDays || [1, 2, 3, 4, 5],
           disabledDates: data.config.disabledDates || [],
+          generalDisabledSlots: data.config.generalDisabledSlots || [],
         })
       }
     } catch {
@@ -135,6 +139,17 @@ export default function HorariosAdminPage() {
     setForm(f => ({ ...f, disabledDates: f.disabledDates.filter(d => d !== dateToRemove) }))
   }
 
+  const hideSlot = (time: string) => {
+    setForm(f => {
+      if (f.generalDisabledSlots.includes(time)) return f
+      return { ...f, generalDisabledSlots: [...f.generalDisabledSlots, time] }
+    })
+  }
+
+  const restoreSlots = () => {
+    setForm(f => ({ ...f, generalDisabledSlots: [] }))
+  }
+
   // Calculate preview blocks
   const morningTimes: string[] = []
   const afternoonTimes: string[] = []
@@ -150,10 +165,13 @@ export default function HorariosAdminPage() {
       const h = Math.floor(cur / 60)
       const m = cur % 60
       const formatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-      if (h < 14) {
-        morningTimes.push(formatted)
-      } else {
-        afternoonTimes.push(formatted)
+      
+      if (!form.generalDisabledSlots.includes(formatted)) {
+        if (h < 14) {
+          morningTimes.push(formatted)
+        } else {
+          afternoonTimes.push(formatted)
+        }
       }
       cur += step
     }
@@ -421,9 +439,17 @@ export default function HorariosAdminPage() {
                     {morningTimes.map(t => (
                       <div
                         key={t}
-                        className="px-3 py-2 bg-cream-dark/40 border border-border/70 rounded-xl text-xs font-semibold text-charcoal text-center"
+                        className="group flex items-center justify-between px-3 py-2 bg-cream-dark/40 border border-border/70 rounded-xl text-xs font-semibold text-charcoal"
                       >
-                        {t} h
+                        <span>{t} h</span>
+                        <button
+                          type="button"
+                          onClick={() => hideSlot(t)}
+                          className="opacity-0 group-hover:opacity-100 hover:text-rose-600 transition-all p-0.5"
+                          title="Eliminar este bloque"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -440,9 +466,17 @@ export default function HorariosAdminPage() {
                     {afternoonTimes.map(t => (
                       <div
                         key={t}
-                        className="px-3 py-2 bg-cream-dark/40 border border-border/70 rounded-xl text-xs font-semibold text-charcoal text-center"
+                        className="group flex items-center justify-between px-3 py-2 bg-cream-dark/40 border border-border/70 rounded-xl text-xs font-semibold text-charcoal"
                       >
-                        {t} h
+                        <span>{t} h</span>
+                        <button
+                          type="button"
+                          onClick={() => hideSlot(t)}
+                          className="opacity-0 group-hover:opacity-100 hover:text-rose-600 transition-all p-0.5"
+                          title="Eliminar este bloque"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -455,6 +489,18 @@ export default function HorariosAdminPage() {
                   {morningTimes.length + afternoonTimes.length} bloques
                 </span>
               </div>
+
+              {form.generalDisabledSlots.length > 0 && (
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={restoreSlots}
+                    className="text-[11px] font-semibold text-garnet hover:text-garnet-dark flex items-center gap-1 bg-garnet/10 px-2 py-1.5 rounded-lg transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" /> Restaurar bloques eliminados ({form.generalDisabledSlots.length})
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Sincronización Realtime Box */}

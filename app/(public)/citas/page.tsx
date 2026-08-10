@@ -72,7 +72,7 @@ export default function CitasPage() {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const [step, setStep] = useState<Step>('calendar')
   const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<{ bankDetails: string; slot: { date: string; time: string }; whatsappUrl?: string; rebecaNotifyUrl?: string } | null>(null)
+  const [result, setResult] = useState<{ bankDetails: string; slot: { date: string; time: string }; whatsappUrl?: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -87,7 +87,9 @@ export default function CitasPage() {
     setLoading(true)
     const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
     try {
-      const res = await fetch(`/api/citas/slots?month=${monthStr}`)
+      const res = await fetch(`/api/citas/slots?month=${monthStr}&t=${Date.now()}`, {
+        cache: 'no-store'
+      })
       const data = await res.json()
       setSlots(data.slots ?? [])
     } catch {
@@ -149,15 +151,8 @@ export default function CitasPage() {
         bankDetails: data.bankDetails,
         slot: data.slot,
         whatsappUrl: data.whatsappUrl,
-        rebecaNotifyUrl: data.rebecaNotifyUrl,
       })
       setStep('confirmation')
-      // Auto-open WhatsApp notification for Rebeca when a new booking arrives
-      if (data.rebecaNotifyUrl) {
-        setTimeout(() => {
-          window.open(data.rebecaNotifyUrl, '_blank', 'noopener,noreferrer')
-        }, 800)
-      }
     } catch {
       setError('Error de conexión. Por favor, inténtalo de nuevo.')
     } finally {

@@ -6,12 +6,17 @@ export const metadata = {
 
 function Section({ id, icon: Icon, title, children }: { id: string; icon: any; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="bg-white border border-border/60 rounded-2xl overflow-hidden shadow-sm">
-      <div className="flex items-center gap-3 px-6 py-4 bg-garnet text-cream border-b border-garnet-dark/30">
-        <Icon className="w-5 h-5 text-gold shrink-0" />
-        <h2 className="font-serif text-lg font-bold">{title}</h2>
+    <section id={id} className="bg-white border border-border/60 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="flex items-center gap-3 px-6 py-5 bg-gradient-to-r from-garnet-dark via-garnet to-garnet-dark text-cream border-b border-garnet-light/20 relative overflow-hidden">
+        {/* Decoración de fondo */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+        
+        <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm border border-white/10 shadow-inner">
+          <Icon className="w-4 h-4 text-gold" />
+        </div>
+        <h2 className="font-serif text-xl font-bold tracking-wide relative z-10">{title}</h2>
       </div>
-      <div className="px-6 py-5 font-sans text-sm text-charcoal/90 space-y-4">{children}</div>
+      <div className="px-6 py-6 font-sans text-sm text-charcoal/90 space-y-5 bg-gradient-to-b from-white to-cream/20">{children}</div>
     </section>
   )
 }
@@ -81,9 +86,12 @@ export default function GuiaPage() {
       </div>
 
       {/* ── Tabla de contenido ── */}
-      <div className="bg-white border border-border/60 rounded-2xl p-5 shadow-sm">
-        <p className="text-xs text-warm-gray uppercase font-bold tracking-wider mb-3 font-sans">Contenido</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-sm font-sans">
+      <div className="bg-white border border-border/60 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <p className="text-xs text-garnet uppercase font-black tracking-widest mb-4 font-sans flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-gold"></span> Índice de Contenidos
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-sans relative z-10">
           {[
             { href: '#citas', label: '1. Gestión de citas' },
             { href: '#estados', label: '2. Estados de cita' },
@@ -95,10 +103,12 @@ export default function GuiaPage() {
             <a
               key={href}
               href={href}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-charcoal hover:bg-cream-dark hover:text-garnet transition-colors group"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-charcoal bg-cream/40 hover:bg-garnet/5 border border-transparent hover:border-garnet/10 hover:text-garnet transition-all duration-300 group shadow-2xs hover:shadow-sm"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-garnet/50 group-hover:text-garnet transition-colors" />
-              {label}
+              <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-xs border border-border/50 group-hover:border-garnet/20">
+                <ChevronRight className="w-3 h-3 text-warm-gray group-hover:text-garnet transition-colors" />
+              </div>
+              <span className="font-medium">{label}</span>
             </a>
           ))}
         </div>
@@ -319,32 +329,39 @@ export default function GuiaPage() {
       {/* ── 5. Horarios ── */}
       <Section id="horarios" icon={Clock} title="5. Horarios y Disponibilidad">
         <p>
-          En la sección <strong>Horarios y Bloques</strong> (accesible desde el menú lateral) puedes gestionar
-          qué días y horas aparecen disponibles para que los clientes puedan reservar cita.
+          En la sección <strong>Horarios y Bloques</strong> (accesible desde el menú lateral) puedes configurar
+          los días y las horas que estarán disponibles en el selector de la web pública.
         </p>
 
         <div>
-          <p className="font-semibold text-charcoal mb-2">¿Cómo añadir nuevas fechas disponibles?</p>
-          <ol className="space-y-2">
-            <Step n={1} text='Ve a "Horarios y Bloques" en el menú lateral izquierdo.' />
-            <Step n={2} text='Selecciona el día en el calendario que quieras habilitar.' />
-            <Step n={3} text='Añade las horas disponibles para ese día (p.ej. 10:00, 11:00, 12:00).' />
-            <Step n={4} text='Guarda los cambios. Los clientes ya podrán ver y reservar esos horarios.' />
-          </ol>
+          <p className="font-semibold text-charcoal mb-2">Configuración General</p>
+          <ul className="space-y-2">
+            <Step n={1} text='Elige tu hora de inicio, tu hora de fin, y la duración de cada consulta (30 o 60 minutos).' />
+            <Step n={2} text='Selecciona los días de la semana en los que atiendes consultas marcándolos en color.' />
+            <Step n={3} text='Al guardar, se generarán automáticamente los bloques para cada día del mes actual y futuro.' />
+          </ul>
         </div>
 
         <div>
-          <p className="font-semibold text-charcoal mb-2">¿Qué pasa cuando alguien reserva?</p>
-          <p className="text-xs leading-relaxed">
-            Al confirmar una reserva, ese horario se marca automáticamente como <strong>ocupado</strong> y
-            desaparece del calendario público. Si cancelas la cita en el panel, el horario vuelve a estar
-            disponible automáticamente.
-          </p>
+          <p className="font-semibold text-charcoal mb-2">Bloquear Días o Horas Específicas</p>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
+              <span className="leading-relaxed">
+                <strong>Días inhabilitados (Vacaciones/Festivos):</strong> Usa el selector de fecha para añadir un día específico en el que no vas a trabajar. Ningún bloque estará disponible ese día.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
+              <span className="leading-relaxed">
+                <strong>Eliminar horas sueltas (Media jornada, descanso):</strong> En la <em>Vista Previa de Horarios</em> (columna derecha), puedes hacer clic en la <strong>"X"</strong> que aparece al pasar el ratón por encima de un bloque (ej. 14:00 h). Esto borrará ese horario de la disponibilidad de todos los días. Puedes restaurarlos haciendo clic en el botón de "Restaurar bloques".
+              </span>
+            </li>
+          </ul>
         </div>
 
         <Tip>
-          Añade los horarios con antelación para que los clientes puedan ver la disponibilidad real.
-          Si tienes días festivos o vacaciones, simplemente no añadas horarios esos días.
+          Cualquier cambio que realices y guardes, se sincronizará <strong>inmediatamente</strong> en la web para los clientes. Al reservar una cita, el bloque correspondiente desaparecerá solo en ese día.
         </Tip>
       </Section>
 

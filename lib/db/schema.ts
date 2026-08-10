@@ -54,6 +54,11 @@ export const verification = pgTable('verification', {
 
 // --- App tables ------------------------------------------------------------
 
+export const settings = pgTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+})
+
 /**
  * available_slots: slots created by Rebeca (admin) that clients can book.
  * date: ISO date string "YYYY-MM-DD", time: "HH:MM"

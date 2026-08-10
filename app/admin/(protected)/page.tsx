@@ -220,191 +220,214 @@ function AppointmentCard({
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <article className="bg-white rounded-2xl border border-border/60 shadow-sm hover:shadow-lg hover:border-garnet/25 transition-all duration-200 overflow-hidden">
+    <article className="bg-white rounded-3xl border border-border/40 shadow-sm hover:shadow-xl hover:border-garnet/30 transition-all duration-300 overflow-hidden group relative">
+      {/* Glow effect on hover based on status */}
+      <div className={`absolute top-0 right-0 w-32 h-32 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none ${appt.status === 'confirmed' ? 'bg-emerald-500' : appt.status === 'cancelled' ? 'bg-rose-500' : 'bg-amber-500'}`} />
+      
       <div className="flex">
-        {/* Status bar */}
+        {/* Status bar indicator */}
         <div
-          className={`w-1.5 shrink-0 ${
+          className={`w-2 shrink-0 transition-colors duration-300 ${
             appt.status === 'confirmed'
-              ? 'bg-emerald-500'
+              ? 'bg-gradient-to-b from-emerald-400 to-emerald-600'
               : appt.status === 'cancelled'
-              ? 'bg-rose-500'
-              : 'bg-amber-400'
+              ? 'bg-gradient-to-b from-rose-400 to-rose-600'
+              : 'bg-gradient-to-b from-amber-300 to-amber-500'
           }`}
         />
 
-        <div className="flex-1 p-4 sm:p-5">
+        <div className="flex-1 p-5 sm:p-6 relative z-10">
           {/* Top row */}
-          <div className="flex flex-wrap items-start gap-3 justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-garnet to-garnet-dark text-cream font-serif font-bold text-base flex items-center justify-center shrink-0 shadow-md shadow-garnet/20">
+          <div className="flex flex-wrap items-start gap-4 justify-between">
+            <div className="flex items-center gap-4 min-w-0">
+              {/* Avatar */}
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-garnet to-garnet-dark text-cream font-serif font-bold text-xl flex items-center justify-center shrink-0 shadow-lg shadow-garnet/25 border border-garnet-light/20">
                 {appt.clientName.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <h3 className="font-serif text-lg font-bold text-charcoal leading-tight truncate">
+                <h3 className="font-serif text-xl font-bold text-charcoal leading-tight truncate tracking-wide">
                   {appt.clientName}
                 </h3>
-                <p className="text-[11px] text-warm-gray font-sans mt-0.5">
-                  Ref&nbsp;#{appt.id} · Recibida el {formatCreatedAt(appt.createdAt)}
+                <p className="text-xs text-warm-gray font-sans mt-1">
+                  Ref&nbsp;<span className="font-mono text-charcoal/60">#{appt.id}</span> <span className="mx-1.5 opacity-50">•</span> {formatCreatedAt(appt.createdAt)}
                 </p>
               </div>
             </div>
 
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm shrink-0 ${statusInfo.bg} ${statusInfo.color} ${statusInfo.border}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-xs shrink-0 transition-colors ${statusInfo.bg} ${statusInfo.color} ${statusInfo.border}`}
             >
-              <StatusIcon className="w-3.5 h-3.5" />
+              <StatusIcon className="w-4 h-4" />
               {statusInfo.label}
             </span>
           </div>
 
           {/* Info pills */}
-          <div className="mt-3 flex flex-wrap gap-2 text-xs font-sans">
-            <div className="flex items-center gap-1.5 bg-cream-dark border border-border rounded-lg px-2.5 py-1.5">
-              <Calendar className="w-3.5 h-3.5 text-garnet shrink-0" />
-              <span className="text-charcoal font-medium">
+          <div className="mt-5 flex flex-wrap gap-2.5 text-xs font-sans">
+            <div className="flex items-center gap-2 bg-cream-dark/50 border border-border/80 rounded-xl px-3 py-2 text-charcoal/90">
+              <Calendar className="w-4 h-4 text-garnet shrink-0" />
+              <span className="font-medium">
                 {appt.slotDate ? formatDateEs(appt.slotDate) : 'Fecha pendiente'}
                 {appt.slotTime && (
-                  <span className="text-garnet font-bold"> · {appt.slotTime.slice(0, 5)} h</span>
+                  <span className="text-garnet font-bold ml-1 px-1.5 py-0.5 bg-garnet/5 rounded-md">
+                    {appt.slotTime.slice(0, 5)} h
+                  </span>
                 )}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-garnet text-cream rounded-lg px-2.5 py-1.5 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-cream shrink-0" />
-              <span className="font-semibold">{appt.migratorySituation}</span>
+            <div className="flex items-center gap-2 bg-garnet/5 border border-garnet/10 text-garnet rounded-xl px-3 py-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-garnet shrink-0 animate-pulse" />
+              <span className="font-bold">{appt.migratorySituation}</span>
             </div>
           </div>
 
           {/* Expandable trigger */}
           <button
             onClick={() => setExpanded(e => !e)}
-            className="mt-3 flex items-center gap-1 text-[11px] text-warm-gray hover:text-garnet font-sans font-medium transition-colors"
+            className="mt-4 flex items-center gap-1.5 text-xs text-warm-gray hover:text-garnet font-sans font-bold transition-all bg-transparent hover:bg-garnet/5 px-3 py-1.5 rounded-lg -ml-2"
           >
-            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            {expanded ? 'Ocultar detalles' : 'Ver contacto y acciones'}
+            <div className={`transform transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
+              <ChevronDown className="w-4 h-4" />
+            </div>
+            {expanded ? 'Ocultar contacto y acciones' : 'Ver contacto y acciones'}
           </button>
 
           {expanded && (
-            <div className="mt-3 pt-3 border-t border-border/40 space-y-3 font-sans">
-              {/* Contact */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="mt-4 pt-4 border-t border-border/40 space-y-4 font-sans animate-in fade-in slide-in-from-top-2 duration-300">
+              {/* Contact Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a
                   href={`tel:${appt.clientPhone}`}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-cream-dark border border-border text-charcoal hover:text-garnet hover:border-garnet/40 hover:bg-garnet/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream-dark/30 border border-border text-charcoal hover:text-garnet hover:border-garnet/30 hover:bg-garnet/5 transition-all group"
                 >
-                  <Phone className="w-3.5 h-3.5 text-garnet shrink-0" />
-                  <span className="truncate font-medium">{appt.clientPhone}</span>
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs border border-border/50 group-hover:border-garnet/20">
+                    <Phone className="w-4 h-4 text-garnet shrink-0" />
+                  </div>
+                  <span className="truncate font-semibold tracking-wide">{appt.clientPhone}</span>
                 </a>
                 <a
                   href={`mailto:${appt.clientEmail}`}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-cream-dark border border-border text-charcoal hover:text-garnet hover:border-garnet/40 hover:bg-garnet/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-cream-dark/30 border border-border text-charcoal hover:text-garnet hover:border-garnet/30 hover:bg-garnet/5 transition-all group"
                 >
-                  <Mail className="w-3.5 h-3.5 text-garnet shrink-0" />
-                  <span className="truncate font-medium">{appt.clientEmail}</span>
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs border border-border/50 group-hover:border-garnet/20">
+                    <Mail className="w-4 h-4 text-garnet shrink-0" />
+                  </div>
+                  <span className="truncate font-semibold tracking-wide">{appt.clientEmail}</span>
                 </a>
               </div>
 
-              {/* Message */}
+              {/* Message Box */}
               {appt.message && (
-                <div className="flex gap-2 bg-cream-dark border border-border rounded-xl p-3 text-xs text-charcoal/80">
-                  <MessageSquare className="w-3.5 h-3.5 text-garnet shrink-0 mt-0.5" />
+                <div className="flex gap-3 bg-white border border-border/80 shadow-xs rounded-2xl p-4 text-sm text-charcoal/80 relative overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-garnet/20" />
+                  <MessageSquare className="w-5 h-5 text-garnet/60 shrink-0 mt-0.5" />
                   <p className="italic leading-relaxed">"{appt.message}"</p>
                 </div>
               )}
 
-              {/* Quick actions */}
-              <div className="flex flex-wrap gap-1.5">
-                <a
-                  href={waGreet(appt)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white shadow-sm transition-transform hover:scale-[1.03]"
-                  style={{ background: '#25D366' }}
-                >
-                  Saludar
-                </a>
-                <a
-                  href={waConfirmPayment(appt)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white shadow-sm transition-transform hover:scale-[1.03]"
-                  style={{ background: '#128C7E' }}
-                >
-                  Confirmar + datos pago
-                </a>
-                <a
-                  href={waPaymentOnly(appt)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 transition-colors"
-                >
-                  <CreditCard className="w-3 h-3" /> Enviar datos de pago
-                </a>
-                <a
-                  href={mailtoClient(appt)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-garnet text-cream shadow-sm hover:bg-garnet-dark transition-colors"
-                >
-                  <Mail className="w-3 h-3" /> Email
-                </a>
-                <a
-                  href={waNotifyRebeca(appt)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500 text-white shadow-sm hover:bg-amber-400 transition-colors"
-                >
-                  <Bell className="w-3 h-3" /> Notificarme
-                </a>
+              {/* Quick actions row */}
+              <div>
+                <p className="text-[10px] uppercase font-bold text-warm-gray tracking-widest mb-2">Acciones Rápidas (Comunicación)</p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={waGreet(appt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+                    style={{ background: 'linear-gradient(135deg, #25D366, #1DA851)' }}
+                  >
+                    Saludar
+                  </a>
+                  <a
+                    href={waConfirmPayment(appt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+                    style={{ background: 'linear-gradient(135deg, #128C7E, #075E54)' }}
+                  >
+                    Confirmar + datos pago
+                  </a>
+                  <a
+                    href={waPaymentOnly(appt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+                  >
+                    <CreditCard className="w-3.5 h-3.5" /> Datos de pago
+                  </a>
+                  <a
+                    href={mailtoClient(appt)}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-br from-garnet-light to-garnet-dark text-cream shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+                  >
+                    <Mail className="w-3.5 h-3.5" /> Email
+                  </a>
+                  <a
+                    href={waNotifyRebeca(appt)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+                  >
+                    <Bell className="w-3.5 h-3.5" /> Notificarme
+                  </a>
+                </div>
               </div>
 
-              {/* Status + delete actions */}
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/30">
-                <button
-                  onClick={onView}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-white text-charcoal border border-border hover:border-garnet/40 hover:text-garnet transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5 text-garnet" /> Detalle
-                </button>
-
-                {appt.status !== 'confirmed' && (
+              {/* Status Management Row */}
+              <div className="pt-4 border-t border-border/40">
+                <p className="text-[10px] uppercase font-bold text-warm-gray tracking-widest mb-2">Gestión de la cita</p>
+                <div className="flex flex-wrap gap-2 items-center">
                   <button
-                    onClick={() => onRequestAction('confirm', appt)}
-                    disabled={updating === appt.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 transition-colors disabled:opacity-60"
+                    onClick={onView}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white text-charcoal border-2 border-border hover:border-garnet/40 hover:text-garnet hover:bg-garnet/5 transition-all shadow-xs"
                   >
-                    {updating === appt.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
-                    Confirmar
+                    <Eye className="w-4 h-4 text-garnet" /> Ficha Completa
                   </button>
-                )}
 
-                {appt.status !== 'cancelled' && (
+                  <div className="h-6 w-px bg-border/80 mx-1 hidden sm:block" />
+
+                  {appt.status !== 'confirmed' && (
+                    <button
+                      onClick={() => onRequestAction('confirm', appt)}
+                      disabled={updating === appt.id}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-transparent transition-all disabled:opacity-60"
+                    >
+                      {updating === appt.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                      Confirmar
+                    </button>
+                  )}
+
+                  {appt.status !== 'cancelled' && (
+                    <button
+                      onClick={() => onRequestAction('cancel', appt)}
+                      disabled={updating === appt.id}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white hover:border-transparent transition-all disabled:opacity-60"
+                    >
+                      {updating === appt.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                      Cancelar
+                    </button>
+                  )}
+
+                  {appt.status !== 'pending' && (
+                    <button
+                      onClick={() => onRequestAction('pending', appt)}
+                      disabled={updating === appt.id}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-500 hover:text-white hover:border-transparent transition-all disabled:opacity-60"
+                    >
+                      <Clock className="w-4 h-4" /> Marcar Pendiente
+                    </button>
+                  )}
+
+                  <div className="flex-1" />
+
                   <button
-                    onClick={() => onRequestAction('cancel', appt)}
-                    disabled={updating === appt.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-600 text-white shadow-sm hover:bg-rose-500 transition-colors disabled:opacity-60"
+                    onClick={() => onRequestAction('delete', appt)}
+                    className="inline-flex items-center justify-center p-2 rounded-xl text-warm-gray hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                    title="Eliminar cita permanentemente"
                   >
-                    {updating === appt.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
-                    Cancelar
+                    <Trash2 className="w-5 h-5" />
                   </button>
-                )}
-
-                {appt.status !== 'pending' && (
-                  <button
-                    onClick={() => onRequestAction('pending', appt)}
-                    disabled={updating === appt.id}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-60"
-                  >
-                    <Clock className="w-3 h-3" /> Pendiente
-                  </button>
-                )}
-
-                {/* Delete */}
-                <button
-                  onClick={() => onRequestAction('delete', appt)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-rose-300 text-rose-600 hover:bg-rose-50 transition-colors"
-                >
-                  <Trash2 className="w-3 h-3" /> Eliminar
-                </button>
+                </div>
               </div>
             </div>
           )}

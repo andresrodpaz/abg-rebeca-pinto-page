@@ -134,22 +134,6 @@ export async function POST(request: NextRequest) {
     const formattedDate = formatDateEs(actualSlot.date)
     const formattedTime = `${actualSlot.time.slice(0, 5)} h`
 
-    // ── Automatic WhatsApp notification to Rebeca ────────────────────────────
-    // This URL is returned to the confirmation page and auto-opened so Rebeca
-    // receives an instant WhatsApp self-message with all the booking details.
-    const rebecaNotifyLines = [
-      '🔔 NUEVA RESERVA DE CITA',
-      '',
-      `Cliente: ${clientName}`,
-      `Fecha: ${formattedDate}`,
-      `Hora: ${formattedTime}`,
-      `Tramite: ${migratorySituation}`,
-      `Tel: ${clientPhone}`,
-      `Email: ${clientEmail}`,
-      ...(message ? ['', `Nota: ${message}`] : []),
-    ]
-    const rebecaNotifyUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(rebecaNotifyLines.join('\n'))}`
-
     // ── WhatsApp message from the client's perspective ───────────────────────
     const waLines = [
       `Hola Rebeca, acabo de solicitar una cita a través de tu web.`,
@@ -168,8 +152,6 @@ export async function POST(request: NextRequest) {
       slot: { date: actualSlot.date, time: actualSlot.time },
       bankDetails: BANK_DETAILS,
       whatsappUrl: waUrl,
-      // Auto-notification: confirmation page should open this automatically
-      rebecaNotifyUrl,
     })
   } catch (error) {
     console.error('[citas] Error creating appointment:', error)

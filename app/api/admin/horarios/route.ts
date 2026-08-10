@@ -14,7 +14,7 @@ async function requireAdmin() {
 export async function GET() {
   try {
     await requireAdmin()
-    const config = getScheduleConfig()
+    const config = await getScheduleConfig()
     return NextResponse.json({ config }, {
       headers: {
         'Cache-Control': 'no-store, max-age=0'
@@ -36,15 +36,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate if action is to disable/enable a date or specific slot
-    const { startHour, endHour, slotDurationMinutes, activeDays, disabledDates, action, date, time } = body
+    const { startHour, endHour, slotDurationMinutes, activeDays, disabledDates, generalDisabledSlots, action, date, time } = body
 
-    const current = getScheduleConfig()
+    const current = await getScheduleConfig()
 
     if (action === 'toggleDate' && date) {
       const newDisabledDates = current.disabledDates.includes(date)
         ? current.disabledDates.filter(d => d !== date)
         : [...current.disabledDates, date]
-      const updated = saveScheduleConfig({ disabledDates: newDisabledDates })
+      const updated = await saveScheduleConfig({ disabledDates: newDisabledDates })
       return NextResponse.json({ success: true, config: updated })
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       const disabledSlots = exists
         ? current.disabledSlots.filter(ds => !(ds.date === date && ds.time === time))
         : [...current.disabledSlots, { date, time }]
-      const updated = saveScheduleConfig({ disabledSlots })
+      const updated = await saveScheduleConfig({ disabledSlots })
       return NextResponse.json({ success: true, config: updated })
     }
 
@@ -64,8 +64,9 @@ export async function POST(request: NextRequest) {
     if (slotDurationMinutes) updateData.slotDurationMinutes = Number(slotDurationMinutes)
     if (Array.isArray(activeDays)) updateData.activeDays = activeDays
     if (Array.isArray(disabledDates)) updateData.disabledDates = disabledDates
+    if (Array.isArray(generalDisabledSlots)) updateData.generalDisabledSlots = generalDisabledSlots
 
-    const updated = saveScheduleConfig(updateData)
+    const updated = await saveScheduleConfig(updateData)
     return NextResponse.json({ success: true, config: updated })
   } catch (e) {
     const err = e as Error

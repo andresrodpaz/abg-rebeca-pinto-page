@@ -91,30 +91,15 @@ export default function AdminLayoutShell({ userEmail, children }: AdminLayoutShe
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-cream/90 backdrop-blur-md border-b border-border/70 px-4 md:px-8 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 rounded-xl border border-border bg-white text-charcoal hover:bg-cream-dark transition-colors shadow-2xs"
-              aria-label="Abrir menú"
-            >
-              <Menu className="w-5 h-5 text-garnet" />
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-garnet/10 text-garnet border border-garnet/20">
-                <Shield className="w-3.5 h-3.5" /> Despacho Jurídico
-              </span>
-              <span className="text-xs text-warm-gray font-medium">Alcalá de Henares, Madrid</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white border border-border/80 rounded-full shadow-2xs text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-charcoal font-medium">Sistema Activo</span>
-            </div>
-          </div>
+        {/* Top Header (Mobile Only) */}
+        <header className="md:hidden sticky top-0 z-30 bg-cream/90 backdrop-blur-md border-b border-border/70 px-4 py-3.5 flex items-center">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 rounded-xl border border-border bg-white text-charcoal hover:bg-cream-dark transition-colors shadow-2xs"
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5 text-garnet" />
+          </button>
         </header>
 
         {/* Page Content Container */}
