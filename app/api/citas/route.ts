@@ -3,16 +3,18 @@ import { db } from '@/lib/db'
 import { appointments, availableSlots } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { site } from '@/lib/site'
+import { initAppTables } from '@/lib/db/init'
 
-const BANK_DETAILS = `Titular: Rebeca Pinto Camacho
-IBAN: ES00 0000 0000 0000 0000 0000
+const BANK_DETAILS = `Titular: Rebeca Andreina Pinto Camacho
+IBAN: ES46 2100 2202 6002 0055 8272 (Caixabank)
 Concepto: Consulta + nombre completo
 Importe: 50 €
 
-Bizum: ${site.phone.display}`
+Bizum: 687 20 24 99`
 
 export async function POST(request: NextRequest) {
   try {
+    await initAppTables()
     const body = await request.json()
     const { slotId, slotDate, slotTime, clientName, clientEmail, clientPhone, migratorySituation, message } = body
 
@@ -106,7 +108,10 @@ export async function POST(request: NextRequest) {
           status: 'pending',
         })
         .returning()
-      if (appointment) appointmentId = appointment.id
+      if (appointment) {
+        appointmentId = appointment.id
+        console.log(`[citas] SUCCESS: Cita creada en base de datos. ID: ${appointmentId}, Cliente: ${clientName}, Fecha: ${actualSlot?.date} a las ${actualSlot?.time}`)
+      }
     } catch (dbErr) {
       console.error('[citas] Error creating appointment record:', dbErr)
     }
@@ -129,7 +134,23 @@ export async function POST(request: NextRequest) {
     const formattedDate = formatDateEs(actualSlot.date)
     const formattedTime = `${actualSlot.time.slice(0, 5)} h`
 
-    // WhatsApp message — concise and natural, written from the client's perspective
+    // ── Automatic WhatsApp notification to Rebeca ────────────────────────────
+    // This URL is returned to the confirmation page and auto-opened so Rebeca
+    // receives an instant WhatsApp self-message with all the booking details.
+    const rebecaNotifyLines = [
+      '🔔 NUEVA RESERVA DE CITA',
+      '',
+      `Cliente: ${clientName}`,
+      `Fecha: ${formattedDate}`,
+      `Hora: ${formattedTime}`,
+      `Tramite: ${migratorySituation}`,
+      `Tel: ${clientPhone}`,
+      `Email: ${clientEmail}`,
+      ...(message ? ['', `Nota: ${message}`] : []),
+    ]
+    const rebecaNotifyUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(rebecaNotifyLines.join('\n'))}`
+
+    // ── WhatsApp message from the client's perspective ───────────────────────
     const waLines = [
       `Hola Rebeca, acabo de solicitar una cita a través de tu web.`,
       ``,
@@ -139,8 +160,7 @@ export async function POST(request: NextRequest) {
       ``,
       `Te mando el comprobante de pago en cuanto lo realice. ¡Gracias!`,
     ]
-    const waMessage = waLines.join('\n')
-    const waUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(waMessage)}`
+    const waUrl = `https://wa.me/${site.phone.whatsapp}?text=${encodeURIComponent(waLines.join('\n'))}`
 
     return NextResponse.json({
       success: true,
@@ -148,6 +168,8 @@ export async function POST(request: NextRequest) {
       slot: { date: actualSlot.date, time: actualSlot.time },
       bankDetails: BANK_DETAILS,
       whatsappUrl: waUrl,
+      // Auto-notification: confirmation page should open this automatically
+      rebecaNotifyUrl,
     })
   } catch (error) {
     console.error('[citas] Error creating appointment:', error)

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, serial, integer } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, boolean, serial, integer, date, time } from 'drizzle-orm/pg-core'
 
 // --- Better Auth required tables -------------------------------------------
 
@@ -60,8 +60,8 @@ export const verification = pgTable('verification', {
  */
 export const availableSlots = pgTable('available_slots', {
   id: serial('id').primaryKey(),
-  date: text('date').notNull(),
-  time: text('time').notNull(),
+  date: date('slot_date', { mode: 'string' }).notNull(),
+  time: time('slot_time').notNull(),
   isBooked: boolean('is_booked').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
@@ -75,7 +75,7 @@ export const appointments = pgTable('appointments', {
   clientName: text('client_name').notNull(),
   clientEmail: text('client_email').notNull(),
   clientPhone: text('client_phone').notNull(),
-  migratorySituation: text('migratory_situation').notNull(),
+  migratorySituation: text('situation').notNull(),
   message: text('message'),
   status: text('status').notNull().default('pending'), // pending | confirmed | cancelled
   createdAt: timestamp('createdAt').notNull().defaultNow(),

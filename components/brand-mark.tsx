@@ -40,7 +40,7 @@ export default function BrandMark({
         <span
           className={`block font-serif ${nameSize} font-semibold uppercase text-cream tracking-[0.13em] whitespace-nowrap`}
         >
-          Rebeca Pinto
+          Rebeca Pinto Camacho
         </span>
         <span className="block font-sans text-[9px] md:text-[10px] text-gold/85 uppercase tracking-[0.2em] whitespace-nowrap">
           {site.role} · Extranjería

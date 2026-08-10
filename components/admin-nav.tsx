@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { CalendarDays, Clock, LogOut, ExternalLink, ShieldCheck } from 'lucide-react'
+import { CalendarDays, Clock, LogOut, ExternalLink, ShieldCheck, BookOpen } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 
 export default function AdminNav({ onItemClick }: { onItemClick?: () => void }) {
@@ -18,6 +18,7 @@ export default function AdminNav({ onItemClick }: { onItemClick?: () => void }) 
   const links = [
     { href: '/admin', label: 'Gestión de Citas', icon: CalendarDays },
     { href: '/admin/horarios', label: 'Horarios y Bloques', icon: Clock },
+    { href: '/admin/guia', label: 'Guía de Uso', icon: BookOpen },
   ]
 
   return (

@@ -1,5 +1,7 @@
 'use client'
 
+import { ConfirmModal } from '@/components/confirm-modal'
+
 import { useState, useEffect, useCallback } from 'react'
 import {
   Clock,
@@ -40,6 +42,7 @@ const WEEKDAYS = [
 export default function HorariosAdminPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [newDisabledDate, setNewDisabledDate] = useState('')
 
@@ -76,8 +79,13 @@ export default function HorariosAdminPage() {
     fetchConfig()
   }, [fetchConfig])
 
-  const handleSave = async (e: React.FormEvent) => {
+  const triggerSave = (e: React.FormEvent) => {
     e.preventDefault()
+    setShowConfirm(true)
+  }
+
+  const handleSave = async () => {
+    setShowConfirm(false)
     setSaving(true)
     setMessage(null)
     try {
@@ -235,7 +243,7 @@ export default function HorariosAdminPage() {
                 Configurar Horario y Días Laborables
               </h2>
 
-              <form onSubmit={handleSave} className="space-y-6">
+              <form onSubmit={triggerSave} className="space-y-6">
                 {/* Hours Selectors */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -460,6 +468,18 @@ export default function HorariosAdminPage() {
           </div>
         </div>
       )}
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleSave}
+        title="Guardar Configuración"
+        message="Vas a aplicar esta configuración de horarios en tu web. ¿Estás seguro de que quieres continuar?"
+        confirmText="Guardar"
+        cancelText="Cancelar"
+        variant="warning"
+        isLoading={saving}
+      />
     </div>
   )
 }

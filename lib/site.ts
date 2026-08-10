@@ -25,7 +25,7 @@ export const site = {
     whatsapp: '34687202499',
   },
 
-  email: 'info@rebecapintocamacho.es',
+  email: 'pintocamachorebecaandreina@gmail.com',
 
   address: {
     street: 'C/ Parque de San Fernando, 3',

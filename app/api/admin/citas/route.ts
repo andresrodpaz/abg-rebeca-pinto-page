@@ -4,16 +4,25 @@ import { db } from '@/lib/db'
 import { appointments, availableSlots } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { headers } from 'next/headers'
+import { initAppTables } from '@/lib/db/init'
 
-async function requireAdmin() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user
+async function getAdminSession() {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    return session ?? null
+  } catch {
+    return null
+  }
 }
 
 export async function GET() {
+  const session = await getAdminSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
   try {
-    await requireAdmin()
+    await initAppTables()
 
     const rows = await db
       .select({
@@ -25,29 +34,29 @@ export async function GET() {
         migratorySituation: appointments.migratorySituation,
         message: appointments.message,
         status: appointments.status,
-        createdAt: appointments.createdAt,
         slotDate: availableSlots.date,
         slotTime: availableSlots.time,
       })
       .from(appointments)
       .leftJoin(availableSlots, eq(appointments.slotId, availableSlots.id))
-      .orderBy(desc(appointments.createdAt))
+      .orderBy(desc(appointments.id))
 
     return NextResponse.json({ appointments: rows })
-  } catch (e) {
-    const err = e as Error
-    if (err.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-    console.error('[v0] Error fetching admin appointments:', e)
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (e: any) {
+    console.error('[admin/citas] Error fetching appointments:', e)
+    const errorMsg = e.stack || e.message || String(e)
+    const pgError = e.detail || e.routine || ''
+    return NextResponse.json({ error: 'Error del servidor', details: `${errorMsg} | ${pgError}` }, { status: 500 })
   }
 }
 
 export async function PATCH(request: NextRequest) {
-  try {
-    await requireAdmin()
+  const session = await getAdminSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const { id, status } = await request.json()
 
     if (!id || !['confirmed', 'cancelled', 'pending'].includes(status)) {
@@ -61,11 +70,44 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    const err = e as Error
-    if (err.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    console.error('[admin/citas] Error updating appointment:', e)
+    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await getAdminSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  try {
+    const { id } = await request.json()
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
     }
-    console.error('[v0] Error updating appointment:', e)
+
+    // Find appointment to get slotId before deleting
+    const [appt] = await db
+      .select()
+      .from(appointments)
+      .where(eq(appointments.id, id))
+
+    // Free the slot so it becomes bookable again
+    if (appt?.slotId) {
+      await db
+        .update(availableSlots)
+        .set({ isBooked: false })
+        .where(eq(availableSlots.id, appt.slotId))
+    }
+
+    // Remove the appointment
+    await db.delete(appointments).where(eq(appointments.id, id))
+
+    return NextResponse.json({ success: true })
+  } catch (e) {
+    console.error('[admin/citas] Error deleting appointment:', e)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }

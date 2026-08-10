@@ -3,6 +3,7 @@ import { availableSlots } from '@/lib/db/schema'
 import { and, gte, lte, asc } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
+import { initAppTables } from '@/lib/db/init'
 
 export interface ScheduleConfig {
   startHour: string // e.g. "09:00"
@@ -93,6 +94,7 @@ export async function getAvailableSlotsForMonth(monthStr: string): Promise<SlotI
   // Fetch booked slots and custom slots from DB
   let dbSlots: { id: number; date: string; time: string; isBooked: boolean }[] = []
   try {
+    await initAppTables()
     dbSlots = await db
       .select({
         id: availableSlots.id,

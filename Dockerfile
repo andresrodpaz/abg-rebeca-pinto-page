@@ -34,6 +34,7 @@ ENV HOSTNAME "0.0.0.0"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN apk add --no-cache wget && mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
 # Copy static assets and standalone build output
 COPY --from=builder /app/public ./public
